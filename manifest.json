@@ -1,0 +1,10 @@
+{
+	"id": "japanese-character-count",
+	"name": "Japanese Character Count",
+	"version": "0.1.0",
+	"minAppVersion": "1.4.0",
+	"description": "Counts characters for Japanese writing: whole note, selection, heading sections, and paragraphs.",
+	"author": "hibara",
+	"authorUrl": "https://github.com/hibara",
+	"isDesktopOnly": false
+}

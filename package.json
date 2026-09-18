@@ -1,0 +1,34 @@
+{
+	"name": "obsidian-japanese-character-count",
+	"version": "0.1.0",
+	"description": "Obsidian plugin that counts characters for Japanese writing.",
+	"main": "main.js",
+	"type": "module",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"version": "node version-bump.mjs && git add manifest.json versions.json"
+	},
+	"keywords": [
+		"obsidian",
+		"obsidian-plugin",
+		"japanese",
+		"character-count",
+		"word-count"
+	],
+	"author": "hibara",
+	"license": "MIT",
+	"devDependencies": {
+		"@codemirror/state": "6.5.0",
+		"@codemirror/view": "6.38.6",
+		"@types/node": "^20.12.7",
+		"builtin-modules": "^3.3.0",
+		"esbuild": "^0.28.2",
+		"obsidian": "latest",
+		"tslib": "^2.6.2",
+		"typescript": "^5.4.5",
+		"vitest": "^3.2.7"
+	}
+}

@@ -1,0 +1,109 @@
+/*
+ * 文字数表示は本文より控えめに。
+ * 色やサイズは Obsidian の CSS 変数を使い、Light / Dark 両テーマに追従させる。
+ *
+ * 見た目は下の --jcc-* 変数で調整できる。
+ * ユーザーがCSSスニペット（.obsidian/snippets/）で body に同名の変数を
+ * 定義すれば、プラグインを書き換えずに上書きできる。
+ */
+
+body {
+	/* 囲みの形 */
+	--jcc-count-radius: 999px;
+	--jcc-count-padding: 0.1em 0.5em;
+	--jcc-count-margin-left: 0.75em;
+
+	/* 囲みの色 */
+	--jcc-count-color: var(--text-muted);
+	--jcc-count-background: var(--background-modifier-hover);
+	--jcc-count-border-color: var(--background-modifier-border);
+	--jcc-count-border-width: 1px;
+
+	/* 文字 */
+	--jcc-count-font-size: var(--font-ui-smaller, 0.75em);
+
+	/* 行の右端に寄せるときの、右マージンからの距離 */
+	--jcc-count-right-offset: 0px;
+
+	/* 段落ごとの表示は、見出しより更に控えめに */
+	--jcc-paragraph-count-opacity: 0.7;
+
+	/* 「完」の行に出す総文字数は、作品全体の字数なので少しはっきり見せる */
+	--jcc-total-count-color: var(--text-normal);
+	--jcc-total-count-background: var(--background-modifier-hover);
+	--jcc-total-count-border-color: var(--text-faint);
+}
+
+.jcc-count {
+	box-sizing: border-box;
+	display: inline-block;
+	margin-left: var(--jcc-count-margin-left);
+	padding: var(--jcc-count-padding);
+	border: var(--jcc-count-border-width) solid var(--jcc-count-border-color);
+	border-radius: var(--jcc-count-radius);
+	color: var(--jcc-count-color);
+	background-color: var(--jcc-count-background);
+	font-family: var(--font-interface);
+	font-size: var(--jcc-count-font-size);
+	font-weight: var(--font-normal, 400);
+	font-style: normal;
+	line-height: 1.4;
+	letter-spacing: 0;
+	vertical-align: middle;
+	white-space: nowrap;
+
+	/* 本文の編集・選択の邪魔をしない */
+	pointer-events: none;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+/*
+ * 行の右端に寄せる表示（セクション末尾の文字数）。
+ * 本文の末尾にくっつけると、書くたびに数字が横に動いて落ち着かないため、
+ * 行の右端（本文の右マージン）に固定する。
+ *
+ * .jcc-count-line は位置の基準にするためだけのクラス。
+ */
+.jcc-count-line {
+	position: relative;
+}
+
+.jcc-count-right-aligned {
+	position: absolute;
+	right: var(--jcc-count-right-offset);
+	bottom: 0;
+	margin-left: 0;
+}
+
+.jcc-paragraph-count {
+	opacity: var(--jcc-paragraph-count-opacity);
+}
+
+/* 見出し行では、見出しの装飾（大きさ・太さ・色）を引き継がないようにする */
+.HyperMD-header .jcc-count,
+.cm-header .jcc-count {
+	font-size: var(--jcc-count-font-size);
+	font-weight: var(--font-normal, 400);
+	font-style: normal;
+	color: var(--jcc-count-color);
+	text-decoration: none;
+}
+
+/*
+ * 「完」の行の総文字数。
+ * 見出し行に出るので、見出しの装飾を打ち消す規則（上の .HyperMD-header 系）に
+ * 負けないよう、同じ強さのセレクタを並べておく。
+ */
+.jcc-total-count,
+.HyperMD-header .jcc-total-count,
+.cm-header .jcc-total-count {
+	color: var(--jcc-total-count-color);
+	background-color: var(--jcc-total-count-background);
+	border-color: var(--jcc-total-count-border-color);
+	font-weight: var(--font-medium, 500);
+}
+
+.jcc-status-bar {
+	white-space: nowrap;
+}

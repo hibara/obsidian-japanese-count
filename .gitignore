@@ -1,0 +1,16 @@
+node_modules/
+main.js
+*.js.map
+data.json
+
+# underscore-prefixed dirs (local docs, drafts, etc.)
+_*/
+
+# macOS / Dropbox
+.DS_Store
+*.dropbox
+.dropbox.cache/
+
+# Obsidian / Claude local
+.obsidian/
+.claude/
