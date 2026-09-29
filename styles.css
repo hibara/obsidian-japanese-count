@@ -25,6 +25,9 @@ body {
 	/* 行の右端に寄せるときの、右マージンからの距離 */
 	--jcc-count-right-offset: 0px;
 
+	/* 改行の矢印の直後に文字数が来るとき、矢印の右端から囲みまで空ける距離（本文の em） */
+	--jcc-count-gap-after-newline: 1em;
+
 	/* 段落ごとの表示は、見出しより更に控えめに */
 	--jcc-paragraph-count-opacity: 0.7;
 
@@ -76,6 +79,28 @@ body {
 	margin-left: 0;
 }
 
+/*
+ * 囲みの外側の span（本文と同じ font-size）。
+ * 改行の矢印（幅ゼロのウィジェット）の直後に来たときは、矢印が本文の em で
+ * gap + width だけ右へはみ出しているので、その分＋1em を本文の em で空ける。
+ * 囲み自身の margin-left（小さい em）はこのとき使わない。
+ * 右端に寄せる表示（absolute）は行の流れに乗っていないので対象外。
+ */
+.jcc-count-slot {
+	display: inline;
+}
+
+.jcc-ws-newline + .jcc-count-slot:not(:has(> .jcc-count-right-aligned)) {
+	margin-left: calc(
+		var(--jcc-ws-newline-gap) + var(--jcc-ws-newline-width) +
+			var(--jcc-count-gap-after-newline)
+	);
+}
+
+.jcc-ws-newline + .jcc-count-slot:not(:has(> .jcc-count-right-aligned)) > .jcc-count {
+	margin-left: 0;
+}
+
 .jcc-paragraph-count {
 	opacity: var(--jcc-paragraph-count-opacity);
 }
@@ -106,4 +131,134 @@ body {
 
 .jcc-status-bar {
 	white-space: nowrap;
+}
+
+/*
+ * 空白と改行の可視化（設定「空白と改行を表示」）。
+ * 全角スペース: 点線の四角 ／ 半角スペース: 下端に横棒を置いた逆T字 ／ 改行: CSS で描いた矢印
+ * どれも本文の文字送りには影響しない（印は疑似要素で重ねて描く）。
+ */
+body {
+	--jcc-ws-color: var(--text-faint);
+	/* 全角スペースの四角: 一辺の長さ（文字の中央に置く）と点線の太さ */
+	--jcc-ws-full-size: 0.5em;
+	--jcc-ws-line-width: 1px;
+	/* 半角スペースの逆T字: 横棒の幅、全体の高さ、横棒を文字の下端からどれだけ上げるか、線の太さ */
+	--jcc-ws-half-t-width: 0.32em;
+	/* スペースが続いたときに、隣の印との間に必ず空ける幅。スペースの狭いフォントでは、横棒をこの分だけ残して縮める。
+	   calc で長さから引くので、0 でも必ず単位を付けること */
+	--jcc-ws-half-t-gap: 2px;
+	--jcc-ws-half-t-height: 0.45em;
+	--jcc-ws-half-t-bottom: 0.1em;
+	--jcc-ws-half-t-line-width: max(1px, 0.04em);
+	/* 半角スペースの印を出しているときの、インデントガイド（Obsidian 本体の縦線）の位置。
+	   スペース4つの区切りの先頭から右へどれだけずらすか。0em なら区切り目ちょうど */
+	--jcc-ws-indent-guide-offset: 0em;
+	/* 改行の矢印（CSS で描く）: 本文末尾との間隔、横棒の長さ、縦棒の高さ、矢じりの一辺、線の太さ */
+	--jcc-ws-newline-gap: 0.05em;
+	--jcc-ws-newline-width: 0.4em;
+	--jcc-ws-newline-height: 0.45em;
+	--jcc-ws-newline-head-size: 0.2em;
+	--jcc-ws-newline-line-width: 1.5px;
+	/* 横棒の下端をベースラインからどれだけ下げるか（大きいほど文字の下端に近づく）。
+	   calc で長さと足すので、0 でも必ず単位を付けること（単位なしの 0 は無効になる） */
+	--jcc-ws-newline-offset: 0em;
+}
+
+.jcc-ws-half,
+.jcc-ws-full {
+	position: relative;
+}
+
+.jcc-ws-half::after,
+.jcc-ws-full::after {
+	content: "";
+	position: absolute;
+	pointer-events: none;
+	box-sizing: border-box;
+}
+
+/* 全角スペース: 文字の中央に置いた小さめの点線の四角 */
+.jcc-ws-full::after {
+	left: 50%;
+	top: 50%;
+	width: var(--jcc-ws-full-size);
+	height: var(--jcc-ws-full-size);
+	transform: translate(-50%, -50%);
+	border: var(--jcc-ws-line-width) dotted var(--jcc-ws-color);
+}
+
+/* 半角スペース: 文字の下端に横棒を置き、中央から縦棒が立つ逆T字。
+   横棒は下の枠線、縦棒は中央に置いた背景で描く */
+.jcc-ws-half::after {
+	left: 50%;
+	bottom: var(--jcc-ws-half-t-bottom);
+	width: min(var(--jcc-ws-half-t-width), calc(100% - var(--jcc-ws-half-t-gap)));
+	height: var(--jcc-ws-half-t-height);
+	transform: translateX(-50%);
+	border-bottom: var(--jcc-ws-half-t-line-width) solid var(--jcc-ws-color);
+	background: linear-gradient(var(--jcc-ws-color), var(--jcc-ws-color)) center /
+		var(--jcc-ws-half-t-line-width) 100% no-repeat;
+}
+
+/*
+ * インデントガイド（行頭の半角スペース4つごとに Obsidian 本体が引く縦線）を、区切り目に合わせる。
+ * 本体はライブプレビューで 0.85em、ソースモードで 0.25em 右へずらして引くため、印が見えていると
+ * 線が 3 文字目や 1 文字目の上に乗り、4 文字の区切りとずれて見える。コードブロックの中と同じ位置に揃える。
+ * 箇条書きの行は、ガイドが親の行頭記号の真下に来るよう本体が合わせているので、触らない。
+ */
+.markdown-source-view.mod-cm6 .cm-line:not(.HyperMD-list-line) .cm-indent:has(.jcc-ws-half)::before {
+	margin-inline-start: var(--jcc-ws-indent-guide-offset);
+}
+
+/*
+ * 改行: 行末の矢印。
+ * ウィジェット自体は幅ゼロ（inline-block, width: 0）にして本文の文字送りに
+ * 一切関与させない。行がいっぱいでも次の行へ折り返さず、右マージンへぶら下がる。
+ * 高さもゼロなので、inline-block のベースライン＝下端がちょうど本文のベースラインに乗る。
+ * 矢印は ::before（縦棒＋横棒の L 字）と ::after（矢じり）を絶対配置で重ねて描く。
+ */
+.jcc-ws-newline {
+	position: relative;
+	display: inline-block;
+	width: 0;
+	height: 0;
+	vertical-align: baseline;
+	overflow: visible;
+	pointer-events: none;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+.jcc-ws-newline::before,
+.jcc-ws-newline::after {
+	content: "";
+	position: absolute;
+	left: var(--jcc-ws-newline-gap);
+	box-sizing: border-box;
+	pointer-events: none;
+}
+
+/* 縦棒（右辺）と横棒（下辺）。横棒の下端が offset だけベースラインより下に来る */
+.jcc-ws-newline::before {
+	bottom: calc(-1 * var(--jcc-ws-newline-offset));
+	width: var(--jcc-ws-newline-width);
+	height: var(--jcc-ws-newline-height);
+	border-right: var(--jcc-ws-newline-line-width) solid var(--jcc-ws-color);
+	border-bottom: var(--jcc-ws-newline-line-width) solid var(--jcc-ws-color);
+}
+
+/* 矢じり: 左辺と下辺だけ引いた正方形を 45° 回して「<」にする。
+   回すと角が左へ 0.207 辺ぶん飛び出すので、その分だけ右へ戻して先端を横棒の左端に合わせる。
+   上下は横棒の中心線に揃える */
+.jcc-ws-newline::after {
+	bottom: calc(
+		-1 * var(--jcc-ws-newline-offset) + var(--jcc-ws-newline-line-width) / 2 -
+			var(--jcc-ws-newline-head-size) / 2
+	);
+	width: var(--jcc-ws-newline-head-size);
+	height: var(--jcc-ws-newline-head-size);
+	border-left: var(--jcc-ws-newline-line-width) solid var(--jcc-ws-color);
+	border-bottom: var(--jcc-ws-newline-line-width) solid var(--jcc-ws-color);
+	transform: translateX(20.7%) rotate(45deg);
 }

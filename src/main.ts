@@ -8,6 +8,7 @@ import {
 } from "./decorations";
 import { formatCount } from "./format";
 import { analyzeDocument, type AnalyzeOptions } from "./sections";
+import { createWhitespaceDecorationExtension } from "./whitespace";
 import {
 	DEFAULT_SETTINGS,
 	JapaneseCharacterCountSettingTab,
@@ -36,6 +37,10 @@ export default class JapaneseCharacterCountPlugin extends Plugin {
 		this.statusBarEl.addClass("jcc-status-bar");
 
 		this.registerEditorExtension([
+			// 空白の可視化を先に登録し、行末では「↵」→ 文字数の順に並ぶようにする
+			createWhitespaceDecorationExtension({
+				getSettings: () => this.settings,
+			}),
 			createCountDecorationExtension({
 				getSettings: () => this.settings,
 				getAnalyzeOptions: (countParagraphs) =>
@@ -83,7 +88,15 @@ export default class JapaneseCharacterCountPlugin extends Plugin {
 	}
 
 	async loadSettings(): Promise<void> {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		const data = ((await this.loadData()) ?? {}) as Record<string, unknown>;
+		// 旧設定「空白と改行を表示」（1つのトグル）は、3つのトグルに引き継ぐ
+		if (data.showWhitespace === true) {
+			data.showFullWidthSpaceMarks ??= true;
+			data.showHalfWidthSpaceMarks ??= true;
+			data.showNewlineMarks ??= true;
+		}
+		delete data.showWhitespace;
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
 	}
 
 	async saveSettings(): Promise<void> {

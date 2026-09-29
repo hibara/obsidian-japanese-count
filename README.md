@@ -1,10 +1,41 @@
 # Japanese Character Count
 
+An Obsidian plugin that counts **characters** (not words) for Japanese writing, such as novels and manga scripts. It shows the count for the whole note, the selection, each heading section, and each paragraph, without ever modifying your Markdown files.
+
+[日本語の説明はこちら](#日本語)
+
+## Features
+
+- **Status bar** — the character count of the current note, plus the count of the selection.
+- **Per-heading counts** — each heading line shows the character count of its section, drawn as an editor decoration (source mode and live preview).
+- **Section-end counts** — the same count is repeated at the end of the section, so you do not have to scroll back up in a long chapter.
+- **Per-paragraph counts** (optional, off by default).
+- **End-of-manuscript heading** — a heading such as `# 完` or `# 了` ends the body text. Afterwords and notes below it are not counted, and the total is shown on that line.
+- **Whitespace marks** (optional, off by default) — shows full-width spaces, half-width spaces, and line breaks as marks in the editor.
+- **Grapheme clusters** — emoji, combining characters, and variation selectors count as one character (`Intl.Segmenter`).
+
+## Count modes
+
+| Mode | What it counts |
+| --- | --- |
+| Manuscript (default) | Only the text that is displayed as body text. Markdown syntax, line breaks, YAML frontmatter, comments, and ruby readings are excluded. |
+| Raw Text | The text of the file as it is, including Markdown syntax. |
+| VSCode Compatible | Matches the selection count in the VS Code status bar. |
+| Kakuyomu | Matches the character count of [Kakuyomu](https://kakuyomu.jp/), a Japanese novel posting site. Ruby readings, emphasis-dot markup, spaces, line breaks, and heading lines are excluded. |
+
+## Installation
+
+In Obsidian, open **Settings → Community plugins → Browse**, search for "Japanese Character Count", then install and enable it.
+
+The settings screen and commands are in Japanese.
+
+---
+
+## 日本語
+
 日本語の小説・漫画原作などの執筆のための、Obsidian用の文字数カウントプラグインです。
 
 英語圏向けのWord Countではなく、**日本語の「文字数」**を数えます。ノート全体・選択範囲・見出しごと・段落ごとの文字数を、Markdownファイルを書き換えずに表示します。
-
-> An Obsidian plugin that counts *characters* (not words) for Japanese writing — for the whole note, the selection, each heading section, and each paragraph.
 
 ---
 
@@ -50,6 +81,20 @@
 ```text
 長浜は顕微鏡から目を離した。          14字
 ```
+
+### 空白・改行の表示（任意）
+
+全角スペース・半角スペース・改行を、エディタ上に淡い印で示します。それぞれ個別にオン／オフでき、初期状態ではすべてオフです。文字数には影響しません。
+
+| 対象 | 印 |
+| --- | --- |
+| 全角スペース | 文字の中央に、点線の小さな四角 |
+| 半角スペース | 文字の下端に、「⊥」の形 |
+| 改行 | 行末に、折り返しの矢印 |
+
+半角スペースの印を出しているあいだは、行頭のスペース4つごとにObsidianが引く区切り線（インデントガイド）を、区切り目ちょうどに揃えて表示します。
+
+印の大きさや色は、CSSスニペットで `--jcc-ws-*` の変数を上書きすると変えられます。
 
 ### 「完」「了」での打ち切り
 
@@ -172,6 +217,9 @@ VSCodeのステータスバーに出る選択文字数（全選択したとき�
 | 「完」「了」の見出しで本文を打ち切る | オン |
 | 本文終了とみなす見出し語 | `完, 了` |
 | 親見出しに子見出しの文字数を含める | オフ |
+| 全角スペースを表示 | オフ |
+| 半角スペースを表示 | オフ |
+| 改行を表示 | オフ |
 | 再計算の遅延（ミリ秒） | 200 |
 
 ## コマンド
@@ -182,6 +230,10 @@ VSCodeのステータスバーに出る選択文字数（全選択したとき�
 ---
 
 ## インストール
+
+### コミュニティプラグインから
+
+Obsidianの 設定 → コミュニティプラグイン → 閲覧 で「Japanese Character Count」を検索し、インストールして有効化します。
 
 ### 手動インストール
 
@@ -220,11 +272,14 @@ src/
   markdown.ts     Markdown記法の除去
   sections.ts     見出し・段落・本文範囲の解析
   decorations.ts  エディタ上の文字数表示（CodeMirror Decoration）
+  whitespace.ts   空白・改行の印の表示（CodeMirror Decoration）
   settings.ts     設定の型と設定画面
   format.ts       表示用の数値フォーマット
 tests/
   counter.test.ts
+  format.test.ts
   sections.test.ts
+  whitespace.test.ts
 ```
 
 カウント処理はObsidian APIに依存していないため、そのまま単体テストできます。

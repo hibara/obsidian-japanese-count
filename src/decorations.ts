@@ -42,11 +42,13 @@ class CountWidget extends WidgetType {
 	}
 
 	toDOM(): HTMLElement {
-		const el = document.createElement("span");
-		el.className = `jcc-count ${this.extraClass}`;
-		el.textContent = this.label;
-		el.setAttribute("aria-hidden", "true");
-		return el;
+		// 外側の span は本文と同じ font-size を継承する。囲み（.jcc-count）は小さい
+		// 固定サイズなので、本文の em で間隔を取りたいとき（改行の矢印の直後など）は
+		// 外側の span 側にマージンを付ける。
+		const slot = createSpan({ cls: "jcc-count-slot" });
+		slot.setAttribute("aria-hidden", "true");
+		slot.createSpan({ cls: `jcc-count ${this.extraClass}`, text: this.label });
+		return slot;
 	}
 
 	ignoreEvent(): boolean {
