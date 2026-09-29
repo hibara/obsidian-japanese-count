@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-japanese-character-count",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Obsidian plugin that counts characters for Japanese writing.",
 	"main": "main.js",
 	"type": "module",
