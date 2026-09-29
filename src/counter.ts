@@ -107,15 +107,19 @@ function getSegmenter(): Intl.Segmenter | null {
 export function countGraphemes(text: string): number {
 	const segmenter = getSegmenter();
 	if (!segmenter) return countCodePoints(text);
-	let count = 0;
-	for (const _segment of segmenter.segment(text)) count++;
-	return count;
+	return countItems(segmenter.segment(text));
 }
 
 /** コードポイント単位で数える（サロゲートペアを1文字として扱う）。 */
 export function countCodePoints(text: string): number {
+	return countItems(text);
+}
+
+/** 反復できるものの要素数を、配列を作らずに数える。 */
+function countItems(iterable: Iterable<unknown>): number {
+	const iterator = iterable[Symbol.iterator]();
 	let count = 0;
-	for (const _ch of text) count++;
+	while (!iterator.next().done) count++;
 	return count;
 }
 
@@ -146,7 +150,7 @@ export function toCountableText(text: string, options: CountOptions): string {
 
 	if (opts.excludeNewlines) s = s.replace(/\n/g, "");
 	if (opts.excludeHalfWidthSpace) s = s.replace(/[ \t]/g, "");
-	if (opts.excludeFullWidthSpace) s = s.replace(/　/g, "");
+	if (opts.excludeFullWidthSpace) s = s.replace(/\u3000/g, "");
 
 	return s;
 }

@@ -107,9 +107,10 @@ export function frontmatterEndLine(lines: string[]): number {
  */
 export function stripMarkdown(text: string): string {
 	const protectedParts: string[] = [];
+	// 目印の U+FDD0 は、アプリ内部での利用のために予約された非文字で、本文には現れない
 	const protect = (value: string): string => {
 		protectedParts.push(value);
-		return `\u0000${protectedParts.length - 1}\u0000`;
+		return `\uFDD0${protectedParts.length - 1}\uFDD0`;
 	};
 
 	let s = text;
@@ -142,7 +143,7 @@ export function stripMarkdown(text: string): string {
 	);
 
 	// エスケープされた記号は「本文の1文字」として保護する
-	s = s.replace(/\\([\\`*_{}\[\]()#+\-.!|>~=])/g, (_all, ch: string) =>
+	s = s.replace(/\\([\\`*_{}[\]()#+\-.!|>~=])/g, (_all, ch: string) =>
 		protect(ch)
 	);
 
@@ -179,7 +180,7 @@ export function stripMarkdown(text: string): string {
 	s = s.replace(/(^|[^\w\\])_([^_\n]+?)_(?![\w])/g, "$1$2");
 
 	// 保護した文字列を戻す
-	s = s.replace(/\u0000(\d+)\u0000/g, (_all, idx: string) => {
+	s = s.replace(/\uFDD0(\d+)\uFDD0/g, (_all, idx: string) => {
 		const value = protectedParts[Number(idx)];
 		return value === undefined ? "" : value;
 	});
